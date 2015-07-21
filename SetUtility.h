@@ -57,6 +57,7 @@ namespace SetUtility {
 				unionVector.push_back( rhs[i] );
 			}
 		}
+		return unionVector;
 	}
 
 	template <typename t>
