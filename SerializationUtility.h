@@ -39,7 +39,7 @@ namespace SerializationUtility {
 	UTILITY_API void	ReadInt16(					int16_t&		value,		const Byte*& source );
 	UTILITY_API void	ReadInt32(					int32_t&		value,		const Byte*& source );
 	UTILITY_API void	ReadInt64(					int64_t&		value,		const Byte*& source );
-	UTILITY_API void	ReadUInt16(					uint16_t&		value,		const Byte*& source );
+	UTILITY_API void	ReadUint16(					uint16_t&		value,		const Byte*& source );
 	UTILITY_API void	ReadUint32(					uint32_t&		value,		const Byte*& source );
 	UTILITY_API void	ReadUint64(					uint64_t&		value,		const Byte*& source );
 	UTILITY_API void	ReadFloat(					float&			value,		const Byte*& source );

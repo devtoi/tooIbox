@@ -104,7 +104,7 @@ void SerializationUtility::ReadInt64( int64_t& value, const Byte*& source ) {
 	CopyAndIncrementSource( &value, source, INT_64_SIZE );
 }
 
-void SerializationUtility::ReadUInt16( uint16_t& value, const Byte*& source ) {
+void SerializationUtility::ReadUint16( uint16_t& value, const Byte*& source ) {
 	CopyAndIncrementSource( &value, source, INT_16_SIZE );
 }
 
