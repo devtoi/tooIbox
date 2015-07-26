@@ -17,6 +17,7 @@ file(GLOB_RECURSE UtilitySources
 	"GameTimer.h"
 	"GameTimer.cpp"
 	"Randomizer.h"
+	"IncrementableHandle.h"
 	"Handle.h"
 	"HandleAllocator.h"
 	"PlatformDefinitions.h"
