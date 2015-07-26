@@ -343,7 +343,7 @@ rMap<rString, Config::ConfigEntry*>* Config::GetScopeMap( const rString& scopes 
 	rMap<rString, ConfigEntry*>* mp = cit->second->Value.Map;
 	while ( getline( iss, val, '.' ) ) {
 		cit = mp->find( val );
-		if ( cit == m_configs.end() ) {
+		if ( cit == mp->end() ) {
 			Logger::Log( "Failed to find scope with key: " + val, "Config", LogSeverity::ERROR_MSG );
 			return nullptr;
 		}
