@@ -4,7 +4,7 @@
 
 class GameTimer {
 public:
-	UTILITY_API struct DeltaTimeInfo;
+	struct DeltaTimeInfo;
 
 	UTILITY_API GameTimer();
 

@@ -4,10 +4,10 @@
 
 class Config {
 public:
-	UTILITY_API enum class Type		{ String, Int, Double, Bool, Array, Map };
-	UTILITY_API enum class Stage	{ Key, Value };
+	enum class Type		{ String, Int, Double, Bool, Array, Map };
+	enum class Stage	{ Key, Value };
 	// TODO maybe move to other file?
-	UTILITY_API struct ConfigEntry {
+	struct ConfigEntry {
 		Type Type = Type::Int;
 		rString Comment = "";
 
