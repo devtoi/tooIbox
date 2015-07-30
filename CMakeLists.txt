@@ -30,6 +30,7 @@ file(GLOB_RECURSE UtilitySources
 	"Byte.h"
 	"BitfFlagUtility.h"
 	"Vec4Colors.h"
+	"LocklessQueue.h"
 )
 
 set(UTILITY_MEMORY_LIB)
