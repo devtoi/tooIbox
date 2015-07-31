@@ -57,7 +57,7 @@ public:
 	UTILITY_API int 		GetInt		( const rString& key, int 		defaultValue		= 0, 	const rString& comment = "" );
 	UTILITY_API bool 		GetBool		( const rString& key, bool 		defaultValue 		= false,const rString& comment = "" );
 
-	UTILITY_API rMap<rString, ConfigEntry*>* 	GetScopeMap	( const rString& scopes ) const;
+	UTILITY_API rMap<rString, ConfigEntry*>* 	GetScopeMap	( const rString& scopes, bool logNotFoundError = true ) const;
 	UTILITY_API rVector<ConfigEntry*>* 			GetArray 	( const rString& key );
 
 	UTILITY_API void 		SetString 	( const rString& key, const rString& value );
@@ -77,7 +77,7 @@ private:
 	bool Parse			( const rString& strToParse, rMap<rString, ConfigEntry*>* mapToAddTo );
 	bool ParseArray		( const rString& arrayStr, rVector<ConfigEntry*>* vec	);
 
-	ConfigEntry* 	AssertFind ( const rString& key ) const;
+	ConfigEntry* 	AssertFind ( const rString& key, bool logNotFoundError = true ) const;
 
 	rMap<rString, ConfigEntry*> m_configs;
 	bool m_Dirty = false;

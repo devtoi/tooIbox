@@ -202,7 +202,7 @@ rMap<rString, Config::ConfigEntry*>* Config::CreateNeededMaps( const rString& ke
 }
 
 rString Config::GetString( const rString& key, const rString& defaultValue, const rString& comment ) {
-	const ConfigEntry* ce = AssertFind( key );
+	const ConfigEntry* ce = AssertFind( key, false );
 	if ( ce != nullptr ) {
 		if ( ce->Type == Type::String ) {
 			return rString( ce->Value.StringVal );
@@ -327,13 +327,15 @@ bool Config::GetBool( const rString& key, bool defaultValue, const rString& comm
 	}
 }
 
-rMap<rString, Config::ConfigEntry*>* Config::GetScopeMap( const rString& scopes ) const {
+rMap<rString, Config::ConfigEntry*>* Config::GetScopeMap( const rString& scopes, bool logNotFoundError ) const {
 	rString val;
 	rIStringStream iss( scopes );
 	getline( iss, val, '.' );
 	rMap<rString, ConfigEntry*>::const_iterator cit = m_configs.find( val );
 	if ( cit == m_configs.end() ) {
-		Logger::Log( "Failed to find scope with key: " + val, "Config", LogSeverity::ERROR_MSG );
+		if ( logNotFoundError ) {
+			Logger::Log( "Failed to find scope with key: " + val, "Config", LogSeverity::ERROR_MSG );
+		}
 		return nullptr;
 	}
 	if ( cit->second->Type != Type::Map ) {
@@ -344,7 +346,9 @@ rMap<rString, Config::ConfigEntry*>* Config::GetScopeMap( const rString& scopes 
 	while ( getline( iss, val, '.' ) ) {
 		cit = mp->find( val );
 		if ( cit == mp->end() ) {
-			Logger::Log( "Failed to find scope with key: " + val, "Config", LogSeverity::ERROR_MSG );
+			if ( logNotFoundError ) {
+				Logger::Log( "Failed to find scope with key: " + val, "Config", LogSeverity::ERROR_MSG );
+			}
 			return nullptr;
 		}
 		if ( cit->second->Type != Type::Map ) {
@@ -689,7 +693,7 @@ bool Config::ParseArray( const rString& arrayStr, rVector<ConfigEntry*>* vec ) {
 	return true;
 }
 
-Config::ConfigEntry* Config::AssertFind( const rString& key ) const {
+Config::ConfigEntry* Config::AssertFind( const rString& key, bool logNotFoundError ) const {
 	size_t p = key.find_first_of( '.' );
 
 	rMap<rString, ConfigEntry*>::const_iterator it;
@@ -718,7 +722,7 @@ Config::ConfigEntry* Config::AssertFind( const rString& key ) const {
 	} else { // In scope
 		rString scope = key.substr( 0, p );
 		rString skey = key.substr( p + 1, p - key.size() );
-		rMap<rString, ConfigEntry*>* mp = GetScopeMap( scope );
+		rMap<rString, ConfigEntry*>* mp = GetScopeMap( scope, logNotFoundError );
 		if ( mp == nullptr ) {
 			return nullptr;
 		}
