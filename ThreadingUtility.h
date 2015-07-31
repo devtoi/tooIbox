@@ -32,4 +32,15 @@ namespace ThreadingUtility
 			mutex->unlock();
 		}
 	}
+
+	template<typename Lockable>
+	static void UnlockMutexesVariadic( Lockable& lockable ) {
+		lockable.unlock();
+	}
+
+	template<typename Lockable1, typename... LockableN>
+	static void UnlockMutexesVariadic( Lockable1& lockable1, LockableN&... lockableN ) {
+		UnlockMutexesVariadic( lockableN ... );
+		lockable1.unlock();
+	}
 }
