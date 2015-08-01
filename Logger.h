@@ -52,4 +52,5 @@ namespace Logger {
 	UTILITY_API std::stringstream& GetSeverityOutputStream( LogSeverity::BitFlag logSeverity );
 	UTILITY_API uint32_t GetSeverityOutputUnreadCount( LogSeverity::BitFlag logseverity );
 	UTILITY_API void MarkSeverityOutputStreamRead( LogSeverity::BitFlag logSeverity );
+	UTILITY_API void FlushToFile( bool append = true );
 }

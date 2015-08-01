@@ -1,6 +1,7 @@
 #include "Logger.h"
 #include "ConfigManager.h"
 #include <mutex>
+#include <fstream>
 #include <sstream>
 #include <iomanip>
 
@@ -19,6 +20,13 @@ namespace Logger {
 	std::string TimestampFormat = "%c";
 	bool HighPrecisionStamp = false;
 	unsigned int TreeHeight = 1;
+
+	unsigned int FileFlushAtNrOfLines = 20;
+	std::vector<std::string> LinesToFlush;
+	std::string LogFile = "log.txt";
+	std::mutex FileFlushMutex;
+	bool LogToFile = false;
+	bool AppendToFile = true;
 
 	std::string NameSeparator = ".";
 	bool IWantItAllFlag = false;
@@ -44,12 +52,16 @@ namespace Logger {
 void Logger::Initialize() {
 	CallbackConfig* cfg = g_ConfigManager.GetConfig( LOG_CFG_PATH_FILE );
 
-	HighPrecisionStamp = cfg->GetBool ( "HighPrecisionStamp", false );
-	TreeHeight = static_cast<unsigned int> ( cfg->GetInt ( "TreeHeight", 3 ) );
-	NameSeparator = cfg->GetString ( "NameSeparator", "." ).c_str( );
-	IWantItAllFlag = cfg->GetBool ( "IWantItAll", true );
-	Timestamp = cfg->GetBool ( "Timestamp", false );
-	TimestampFormat = cfg->GetString ( "TimestampFormat", "%H:%M:%S %d-%m-%Y" );
+	HighPrecisionStamp = cfg->GetBool ( "HighPrecisionStamp", false, "Whether to print high precision stamp or not" );
+	TreeHeight = static_cast<unsigned int> ( cfg->GetInt ( "TreeHeight", 3, "How deep to print parent scope" ) );
+	NameSeparator = cfg->GetString ( "NameSeparator", ".", "What separates names when printing the log scope" ).c_str( );
+	IWantItAllFlag = cfg->GetBool ( "IWantItAll", true, "Whether to log all output or not" );
+	Timestamp = cfg->GetBool ( "Timestamp", false, "Whether to print time and date or not" );
+	TimestampFormat = cfg->GetString ( "TimestampFormat", "%H:%M:%S %d-%m-%Y", "How to print the time and date" );
+	FileFlushAtNrOfLines = static_cast<unsigned int>( cfg->GetInt( "FileFlushAtNrOfLines", 100, "Will flush the log to file when this number of lines are in the buffer" ) );
+	LogFile = cfg->GetString( "LogFile", "log.txt", "Which file to log to" );
+	LogToFile = cfg->GetBool( "LogToFile", false, "Whether to log to file or not" );
+	AppendToFile = cfg->GetBool( "AppendToFile", true, "Appends output to file. Otherwise overwrite it" );
 	if ( IWantItAllFlag ) {
 		IWantItAll();
 	}
@@ -58,12 +70,14 @@ void Logger::Initialize() {
 	SeverityOutputs.emplace( LogSeverity::WARNING_MSG,	std::pair<uint32_t, std::stringstream>( 0, std::stringstream() ) );
 	SeverityOutputs.emplace( LogSeverity::INFO_MSG,		std::pair<uint32_t, std::stringstream>( 0, std::stringstream() ) );
 	SeverityOutputs.emplace( LogSeverity::DEBUG_MSG,	std::pair<uint32_t, std::stringstream>( 0, std::stringstream() ) );
+	FlushToFile( false );
 }
 
 /// <summary>
 /// Cleanup logger structures.
 /// </summary>
 void Logger::Cleanup( ) {
+	FlushToFile();
 	LogTypes.clear( );
 	InterestedLogTypes.clear( );
 }
@@ -261,7 +275,12 @@ void Logger::Log ( const rString& message, const rString& type, LogSeverity::Bit
 	}
 	oss << GetParentString ( cit->first.c_str( ), TreeHeight ) << ": " << message << ConsoleColors::Reset << endl;
 	cout << oss.str();
-
+	FileFlushMutex.lock();
+	LinesToFlush.push_back( oss.str() );
+	if ( LinesToFlush.size() >= FileFlushAtNrOfLines ) {
+		FlushToFile( true );
+	}
+	FileFlushMutex.unlock();
 	
 	Mutex.lock(); //Needed because it doesn't seem to be threadsafe. It crashes randomly at startup on Linux.
 	oss2 << GetParentString ( cit->first.c_str( ), TreeHeight ) << ": " << message << endl;
@@ -280,4 +299,18 @@ rString Logger::GetParentString ( const rString& name, unsigned int treeHeight )
 		return name;
 	}
 	return GetParentString ( pit->second.Parent, treeHeight - 1 ) + NameSeparator.c_str( ) + name;
+}
+
+void Logger::FlushToFile( bool append ) {
+	std::ofstream file;
+	if ( AppendToFile || append ) {
+		file.open( LogFile, std::ios::app | std::ios::out );
+	} else {
+		file.open( LogFile, std::ios::out );
+	}
+	for ( const auto& line : LinesToFlush ) {
+		file << line;
+	}
+	file.close();
+	LinesToFlush.clear();
 }
