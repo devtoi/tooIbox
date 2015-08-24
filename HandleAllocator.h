@@ -4,6 +4,7 @@ Zlib Copyright 2015 Johan Melin
 
 #pragma once
 #include "UtilityLibraryDefine.h"
+#include <cassert>
 
 template <typename Handle, typename Implementation, int MaxSize>
 class HandleAllocator {

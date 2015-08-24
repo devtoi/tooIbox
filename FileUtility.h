@@ -5,6 +5,7 @@ Zlib Copyright 2015 Daniel "MonzUn" Bengtsson
 #pragma once
 #include "UtilityLibraryDefine.h"
 #include <fstream>
+#include <iostream>
 
 namespace FileUtility {
 	UTILITY_API bool	CreateFolder( const rString& directoryPath );
@@ -13,10 +14,10 @@ namespace FileUtility {
 	UTILITY_API rString FindLastIncrementationOfPath( const rString& filePath, const rString& extension, unsigned int begin, unsigned int end );
 	UTILITY_API rString GetDirectoryFromFilePath( const rString& filePath );
 	UTILITY_API bool	WriteToFile( const char* data, size_t dataLength, const rString& path );
-	UTILITY_API char*	GetFileContent( const rString& filePath, std::ios::open_mode openMode = std::ios::in );
-	UTILITY_API void	GetFileContent( const rString& filePath, size_t readCount, std::ios::open_mode openMode, char* const out );
-	UTILITY_API rString	GetFileContentAsString( const rString& filePath, std::ios::open_mode openMode = std::ios::in );
-	UTILITY_API size_t	GetFileContentSize( const rString& filePath, std::ios::openmode openMode = std::ios::in );
+	UTILITY_API char*	GetFileContent( const rString& filePath, std::ios_base::openmode openMode = std::ios::in );
+	UTILITY_API void	GetFileContent( const rString& filePath, size_t readCount, std::ios_base::openmode openMode, char* const out );
+	UTILITY_API rString	GetFileContentAsString( const rString& filePath, std::ios_base::openmode openMode = std::ios::in );
+	UTILITY_API size_t	GetFileContentSize( const rString& filePath, std::ios_base::openmode openMode = std::ios::in );
 	UTILITY_API size_t	GetFileContentSize( std::ifstream& inStream );
 	UTILITY_API void 	GetListOfContentInDirectory( const fString& directoryPath, rVector<rString>& outListWithEntries );
 }

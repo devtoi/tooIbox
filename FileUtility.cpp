@@ -8,6 +8,7 @@ Zlib Copyright 2015 Daniel "MonzUn" Bengtsson
 #endif
 #include "FileUtility.h"
 #include <fstream>
+#include <iostream>
 #include "Logger.h"
 
 #if PLATFORM == PLATFORM_WINDOWS
@@ -91,7 +92,7 @@ bool FileUtility::WriteToFile( const char* data, size_t dataLength, const rStrin
 	return true;
 }
 
-char* FileUtility::GetFileContent( const rString& filePath, std::ios::open_mode openMode ) {
+char* FileUtility::GetFileContent( const rString& filePath, std::ios_base::openmode openMode ) {
 	char* fileData = nullptr;
 
 	std::ifstream inStream;
@@ -115,7 +116,7 @@ char* FileUtility::GetFileContent( const rString& filePath, std::ios::open_mode 
 	return fileData;
 }
 
-void FileUtility::GetFileContent( const rString& filePath, size_t readCount, std::ios::open_mode openMode, char* const outBuffer ) { // TODODB: Make it so we donät need to open the file here, should take a stream as parameter
+void FileUtility::GetFileContent( const rString& filePath, size_t readCount, std::ios_base::openmode openMode, char* const outBuffer ) { // TODODB: Make it so we donät need to open the file here, should take a stream as parameter
 	std::ifstream inStream;
 	inStream.open( filePath.c_str(), openMode );
 	if( inStream.is_open() ) {
@@ -126,7 +127,7 @@ void FileUtility::GetFileContent( const rString& filePath, size_t readCount, std
 	}
 }
 
-rString FileUtility::GetFileContentAsString( const rString& filePath, std::ios::open_mode openMode ) {
+rString FileUtility::GetFileContentAsString( const rString& filePath, std::ios_base::openmode openMode ) {
 	rString toReturn;
 
 	size_t fileContentSize = GetFileContentSize( filePath, openMode );
@@ -142,7 +143,7 @@ rString FileUtility::GetFileContentAsString( const rString& filePath, std::ios::
 	return toReturn;
 }
 
-size_t FileUtility::GetFileContentSize( const rString& filePath, std::ios::openmode openMode ) {
+size_t FileUtility::GetFileContentSize( const rString& filePath, std::ios_base::openmode openMode ) {
 	size_t size = 0;
 
 	std::ifstream inStream;

@@ -8,7 +8,7 @@ public:
 	enum class Stage	{ Key, Value };
 	// TODO maybe move to other file?
 	struct ConfigEntry {
-		Type Type = Type::Int;
+		Type Type = Config::Type::Int;
 		rString Comment = "";
 
 		ConfigEntry() {}
@@ -24,15 +24,15 @@ public:
 		} Value;
 
 		~ConfigEntry() {
-			if ( Type == Type::String ) {
+			if ( Type == Config::Type::String ) {
 				pDeleteArray( Value.StringVal );
-			} else if ( Type == Type::Array ) {
+			} else if ( Type == Config::Type::Array ) {
 				for ( rVector<ConfigEntry*>::iterator it = Value.Array->begin();
 					  it != Value.Array->end(); ++it ){
 					pDelete( *it );
 				}
 				pDelete( Value.Array );
-			} else if ( Type == Type::Map ) {
+			} else if ( Type == Config::Type::Map ) {
 				for ( rMap<rString, ConfigEntry*>::iterator it = Value.Map->begin();
 					  it != Value.Map->end(); ++it ) {
 					if ( it->second != nullptr ) {
