@@ -3,6 +3,7 @@ Zlib Copyright 2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "SerializationUtility.h"
+#include <cstring>
 #include "DataSizes.h"
 #include <glm/gtc/quaternion.hpp>
 

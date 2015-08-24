@@ -8,7 +8,7 @@ public:
 	enum class Stage	{ Key, Value };
 	// TODO maybe move to other file?
 	struct ConfigEntry {
-		Type Type = Config::Type::Int;
+		Config::Type Type = Config::Type::Int;
 		rString Comment = "";
 
 		ConfigEntry() {}
