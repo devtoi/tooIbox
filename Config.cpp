@@ -484,6 +484,12 @@ bool Config::Parse( const rString& strToParse, rMap<rString, ConfigEntry*>* mapT
 			if ( key.at( firstNonWhitespace ) == ';' ) {
 				size_t newLine = key.find_first_of( "\n", firstNonWhitespace );
 				size_t currentPos = firstNonWhitespace;
+                while ( newLine == std::string::npos ) {
+                    pString append;
+                    getline( iss, append, ':' );
+                    key += append;
+                    newLine = key.find_first_of( "\n", firstNonWhitespace );
+                }
 				while ( newLine != std::string::npos ) {
 					size_t startOfComment = key.find_first_not_of( " \t\n", currentPos ) + 1;
 					comment += key.substr( startOfComment, newLine - startOfComment );
