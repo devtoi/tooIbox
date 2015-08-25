@@ -12,7 +12,7 @@ public:
 	CallbackRegister ( const CallbackRegister& other ) = delete;
 
 	typedef class Handle<Tag, int, -1> Handle;
-	typedef class HandleHasher<Tag, int, -1> HandleHasher;
+	typedef struct HandleHasher<Tag, int, -1> HandleHasher;
 	typedef std::function<CallbackReturnType( CallbackParameters... )> CallbackFunction;
 	typedef pUnorderedMap<Handle, std::function<CallbackReturnType( CallbackParameters... )>, HandleHasher> CallbackUnorderedMap;
 
