@@ -49,6 +49,7 @@ public:
 	UTILITY_API ~Config();
 
 	UTILITY_API virtual bool 	ReadFile	( const rString& path );
+	UTILITY_API virtual bool 	ReadFileFromMemory	( const char* fileString, const rString& name );
 	UTILITY_API virtual bool 	SaveFile	( const rString& path );
 
 	UTILITY_API rString 	GetString	( const rString& key, const rString& defaultValue 	= "",	const rString& comment = "" );

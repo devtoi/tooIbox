@@ -49,6 +49,23 @@ bool Config::ReadFile( const rString& path ) {
 	}
 }
 
+bool Config::ReadFileFromMemory( const char * fileString, const rString& name ) {
+	if( !fileString ) {
+		return false;
+	}
+
+
+	if ( Parse( fileString, &m_configs ) ) {
+		Logger::Log( "Config file: " + name + " successfully read", "Config", LogSeverity::INFO_MSG );
+		return true;
+	} else {
+		Logger::Log( "Failed to parse config file with path: " + name, "Config", LogSeverity::ERROR_MSG );
+		return false;
+	}
+
+	return true;
+}
+
 void Config::AppendEntry( std::ostream& saveStream, const rString& key, const ConfigEntry& entry, unsigned int indention ) {
 	rString indentString = "";
 	for ( unsigned int i = 0; i < indention; ++i ) {
