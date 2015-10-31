@@ -31,6 +31,9 @@ file(GLOB_RECURSE UtilitySources
 	"BitfFlagUtility.h"
 	"Vec4Colors.h"
 	"LocklessQueue.h"
+	"ThreadPool.h"
+	"ThreadPool.cpp"
+	"./ThreadDefinitions.h"
 )
 
 set(UTILITY_MEMORY_LIB)
