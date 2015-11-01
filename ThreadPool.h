@@ -6,19 +6,20 @@
 #include <deque>
 #include <memory/Alloc.h>
 #include "ThreadDefinitions.h"
+#include "UtilityLibraryDefine.h"
 //#define THREAD_EXECUTION_TIME_TRACKING
 
 class ThreadPool {
 public:
-	ThreadPool();
-	ThreadPool( const ThreadPool& rhs ) = delete;
-	~ThreadPool();
+	UTILITY_API ThreadPool();
+	UTILITY_API ThreadPool( const ThreadPool& rhs ) = delete;
+	UTILITY_API ~ThreadPool();
 
-	bool operator == ( const ThreadPool& rhs ) = delete;
+	UTILITY_API bool operator == ( const ThreadPool& rhs ) = delete;
 
-	void Shutdown ();
+	UTILITY_API void Shutdown ();
 
-	ThreadIdentifier CreateThread ( ThreadType threadType, const pString& name = "Unnamed thread" );
+	UTILITY_API ThreadIdentifier CreateThread ( ThreadType threadType, const pString& name = "Unnamed thread" );
 
 	template <typename ReturnFunction, typename ... Parameters>
 	std::future<ReturnFunction> EnqueueJob( const pString& taskName, ThreadIdentifier threadIdentifier, std::function<ReturnFunction(
@@ -100,7 +101,7 @@ private:
 
 	void			ThreadFunction ( ThreadInfo* threadInfo );
 	void			NamedThreadFunction ( ThreadInfo* threadInfo );
-	PerThreadQueue& GetEditablePerThreadQueue ( ThreadIdentifier threadIdentifier );
+	UTILITY_API PerThreadQueue& GetEditablePerThreadQueue ( ThreadIdentifier threadIdentifier );
 
 	struct ThreadInfo {
 		ThreadType		 Type = ThreadType::Any;
