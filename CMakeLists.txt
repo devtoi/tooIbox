@@ -33,7 +33,8 @@ file(GLOB_RECURSE UtilitySources
 	"LocklessQueue.h"
 	"ThreadPool.h"
 	"ThreadPool.cpp"
-	"./ThreadDefinitions.h"
+	"ThreadDefinitions.h"
+	"WorkStealQueue.h"
 )
 
 set(UTILITY_MEMORY_LIB)
