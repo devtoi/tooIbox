@@ -31,8 +31,8 @@ public:
 		size_t b = m_Bottom;
 		m_Work.at(b & MASK) = work;
 
-		//std::atomic_thread_fence( std::memory_order_acq_rel ); // TODOJM: Use release only?
-		std::atomic_thread_fence( std::memory_order_seq_cst );
+		//std::atomic_thread_fence( std::memory_order_seq_cst ); // TODOJM: Use release only?
+		std::atomic_thread_fence( std::memory_order_acq_rel );
 
 		m_Bottom = b+1;
 	}
@@ -51,11 +51,15 @@ public:
 				return work;
 			}
 
-			if ( !std::atomic_compare_exchange_strong(&m_Top, &t, t+1) )
+			//if ( !std::atomic_compare_exchange_strong(&m_Top, &t, t+1) )
+			size_t t2 = t;
+			if (!m_Top.compare_exchange_strong(t, t+1))
+			//if ( _InterlockedCompareExchange( &m_Top, t + 1, t ) != t )
 			{
+				std::cout << "Failed race in pop" << std::endl;
 				work = nullptr;
 			}
-			m_Bottom = t + 1;
+			m_Bottom = t2 + 1;
 			return work;
 		}
 		else
@@ -68,15 +72,17 @@ public:
 	Work* Steal()
 	{
 		size_t t = m_Top;
-		std::atomic_thread_fence( std::memory_order_seq_cst ); // TODOJM: Use aquire only?
+		//std::atomic_thread_fence( std::memory_order_seq_cst ); // TODOJM: Use aquire only?
+		std::atomic_thread_fence( std::memory_order_acquire );
 		size_t b = m_Bottom;
 		if ( t < b )
 		{
 			Work* work = m_Work.at(t & MASK);
-
-			if ( !std::atomic_compare_exchange_strong(&m_Top, &t, t+1) )
+			
+			if (!m_Top.compare_exchange_strong(t, t+1))
+			//if ( _InterlockedCompareExchange( &m_Top, t + 1, t ) != t )
 			{
-				std::cout << "Failed race" << std::endl;
+				std::cout << "Failed race in steal" << std::endl;
 				return nullptr;
 			}
 
