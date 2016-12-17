@@ -1,6 +1,5 @@
 #include "ThreadPool.h"
 #include <cassert>
-#include "SDL_timer.h"
 
 #ifdef THREAD_EXECUTION_TIME_TRACKING
 	#define TRACK( x ) x
@@ -101,7 +100,9 @@ void ThreadPool::PrintTimes() {
 		for ( auto& threadInfo : m_ThreadInfos ) {
 			threadInfo->TaskTimesLock.lock();
 			for ( auto& time : threadInfo->TaskTimes ) {
-				std::cout << "Thread \"" << threadInfo->Name << "\" ran task \"" << time.TaskName << "\" in " << time.End - time.Start << " ticks." << std::endl;
+				std::cout << "Thread \"" << threadInfo->Name << "\" ran task \"" << time.TaskName << "\" in "
+					<< std::chrono::duration_cast<std::chrono::nanoseconds>( time.End - time.Start ).count()
+					<< " ticks." << std::endl;
 			}
 			threadInfo->TaskTimesLock.unlock();
 		}
@@ -109,27 +110,27 @@ void ThreadPool::PrintTimes() {
 }
 
 void ThreadPool::StartTrackingFrame( ) {
-	m_FrameStart = SDL_GetPerformanceCounter();
+	m_FrameStart = std::chrono::high_resolution_clock::now();
 }
 
 void ThreadPool::EndTrackingFrame( ) {
-	m_FrameEnd = SDL_GetPerformanceCounter();
+	m_FrameEnd = std::chrono::high_resolution_clock::now();
 }
 
-uint64_t ThreadPool::GetTrackingFrameStart() const {
+std::chrono::high_resolution_clock::time_point ThreadPool::GetTrackingFrameStart() const {
 	return m_TrackedFrameStart;
 }
 
-uint64_t ThreadPool::GetTrackingFrameEnd() const {
+std::chrono::high_resolution_clock::time_point ThreadPool::GetTrackingFrameEnd() const {
 	return m_TrackedFrameEnd;
 }
 
 void ThreadPool::StartMainThreadTaskTracking() {
-	TRACK( m_MainThreadStart = SDL_GetPerformanceCounter(); );
+	TRACK( m_MainThreadStart = std::chrono::high_resolution_clock::now(); );
 }
 
 void ThreadPool::StopMainThreadTaskTracking( const pString& taskName ) {
-	TRACK( m_MainThreadEnd = SDL_GetPerformanceCounter(); );
+	TRACK( m_MainThreadEnd = std::chrono::high_resolution_clock::now(); );
 	TRACK( m_MainThreadTaskTimes.push_back( TaskExecutionInfo { taskName, m_MainThreadStart, m_MainThreadEnd } ) );
 }
 
@@ -160,10 +161,10 @@ void ThreadPool::ThreadFunction( ThreadInfo* threadInfo ) {
 			TRACK( pString name = que.TaskNames.front(); );
 			TRACK( que.TaskNames.pop_front(); );
 			que.AccessMutex.unlock();
-			TRACK( uint64_t start = SDL_GetPerformanceCounter(); );
+			TRACK( std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now(); );
 			// Run task and wait for finish
 			f.get();
-			TRACK( uint64_t end = SDL_GetPerformanceCounter(); );
+			TRACK( std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now(); );
 			TRACK( threadInfo->TaskTimesLock.lock() );
 			TRACK( threadInfo->TaskTimes.push_back( TaskExecutionInfo { name, start, end } ) );
 			TRACK( threadInfo->TaskTimesLock.unlock() );

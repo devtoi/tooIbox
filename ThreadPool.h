@@ -75,8 +75,8 @@ public:
 	void StartTrackingFrame ();
 	void EndTrackingFrame ();
 
-	uint64_t GetTrackingFrameStart() const;
-	uint64_t GetTrackingFrameEnd() const;
+	std::chrono::high_resolution_clock::time_point GetTrackingFrameStart() const;
+	std::chrono::high_resolution_clock::time_point GetTrackingFrameEnd() const;
 	
 	void StartMainThreadTaskTracking( );
 	void StopMainThreadTaskTracking( const pString& taskName );
@@ -86,8 +86,8 @@ public:
 
 	struct TaskExecutionInfo {
 		pString	 TaskName;
-		uint64_t Start;
-		uint64_t End;
+		std::chrono::high_resolution_clock::time_point Start;
+		std::chrono::high_resolution_clock::time_point End;
 	};
 
 	struct TrackedThreadInfo {
@@ -139,14 +139,14 @@ private:
 
 	int m_NextSpecificThreadQueueIndex = 0;
 
-	uint64_t m_FrameStart = 0;
-	uint64_t m_FrameEnd = 0;
+	std::chrono::high_resolution_clock::time_point m_FrameStart;
+	std::chrono::high_resolution_clock::time_point m_FrameEnd;
 
-	uint64_t m_TrackedFrameStart = 0;
-	uint64_t m_TrackedFrameEnd = 0;
+	std::chrono::high_resolution_clock::time_point m_TrackedFrameStart;
+	std::chrono::high_resolution_clock::time_point m_TrackedFrameEnd;
 
-	uint64_t m_MainThreadStart = 0;
-	uint64_t m_MainThreadEnd = 0;
+	std::chrono::high_resolution_clock::time_point m_MainThreadStart;
+	std::chrono::high_resolution_clock::time_point m_MainThreadEnd;
 	pVector<TaskExecutionInfo> m_MainThreadTaskTimes;
 
 	bool m_hasShutDown = false;
