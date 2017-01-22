@@ -16,23 +16,14 @@ ThreadPool::~ThreadPool() {
 }
 
 void ThreadPool::Shutdown() {
-	m_TasksAny.AccessMutex.lock();
 	m_TasksAny.Joining = true;
-	m_TasksAny.AccessMutex.unlock();
 	{ // Wake threads up so they can kill themselves
 		std::lock_guard<std::mutex> lock( m_TasksAny.EmptyMutex );
-		m_TasksAny.ExistNewWork = true;
 	}
 	m_TasksAny.EmptyCV.notify_all();
 	for ( int i = 0; i < m_NextSpecificThreadQueueIndex; ++i ) {
 		PerThreadQueue& que = GetEditablePerThreadQueue( static_cast<ThreadIdentifier>( i ) );
-		que.AccessMutex.lock();
 		que.Joining = true;
-		que.AccessMutex.unlock();
-		{ // Wake threads up so they can kill themselves
-			std::lock_guard<std::mutex> lock( que.EmptyMutex );
-			que.ExistNewWork = true;
-		}
 		que.EmptyCV.notify_all();
 	}
 	for ( auto& thread : m_Pool ) {
@@ -46,7 +37,6 @@ void ThreadPool::Shutdown() {
 }
 
 ThreadIdentifier ThreadPool::CreateThread( ThreadType threadType, const pString& name ) {
-	m_TasksAny.AccessMutex.lock();
 	ThreadInfo* threadInfo = pNew( ThreadInfo );
 	threadInfo->Type	   = threadType;
 	threadInfo->QueueIndex = threadType == ThreadType::Any ? ThreadIdentifier::invalid() : static_cast<ThreadIdentifier>( m_NextSpecificThreadQueueIndex++ );
@@ -66,7 +56,6 @@ ThreadIdentifier ThreadPool::CreateThread( ThreadType threadType, const pString&
 
 	m_Pool.push_back( std::move( std::thread( threadFunction, threadInfo ) ) );
 	m_ThreadInfos.push_back( threadInfo );
-	m_TasksAny.AccessMutex.unlock();
 	return static_cast<ThreadIdentifier>( threadInfo->QueueIndex );
 }
 
@@ -142,34 +131,28 @@ void ThreadPool::ThreadFunction( ThreadInfo* threadInfo ) {
 	PerThreadQueue& que = GetEditablePerThreadQueue( threadInfo->QueueIndex );
 
 	while ( true ) {
-		que.AccessMutex.lock();
-		if ( que.Queue.empty() && !que.Joining ) {
-			que.AccessMutex.unlock();
+		if ( que.Queue.IsEmpty() && !que.Joining ) {
 			// Wait until there is more work to be done
 			std::unique_lock<std::mutex> lock( que.EmptyMutex );
-			que.EmptyCV.wait( lock, [&que, this] { return que.ExistNewWork; } );
+			que.EmptyCV.wait( lock, [&que, this] { return que.Joining || !que.Queue.IsEmpty(); } );
 			continue;
-		} else if ( !que.Queue.empty() ) {
+		} else if ( !que.Queue.IsEmpty() ) {
 			// Get new task
-			auto f = std::move( que.Queue.front() );
-			que.Queue.pop_front();
-
-			if ( que.Queue.empty() ) {
-				que.ExistNewWork = false;
-			}
+			std::future<void>* job = que.Queue.Pop();
+			if (!job)
+				continue;
 
 			TRACK( pString name = que.TaskNames.front(); );
 			TRACK( que.TaskNames.pop_front(); );
-			que.AccessMutex.unlock();
 			TRACK( std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now(); );
 			// Run task and wait for finish
-			f.get();
+			job->get();
 			TRACK( std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now(); );
 			TRACK( threadInfo->TaskTimesLock.lock() );
 			TRACK( threadInfo->TaskTimes.push_back( TaskExecutionInfo { name, start, end } ) );
 			TRACK( threadInfo->TaskTimesLock.unlock() );
+			delete job;
 		} else if ( que.Joining ) {
-			que.AccessMutex.unlock();
 			return;
 		}
 	}

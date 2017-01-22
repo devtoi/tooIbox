@@ -7,6 +7,7 @@
 #include <memory/Alloc.h>
 #include "ThreadDefinitions.h"
 #include "UtilityLibraryDefine.h"
+#include "WorkStealQueue.h"
 //#define THREAD_EXECUTION_TIME_TRACKING
 
 class ThreadPool {
@@ -46,20 +47,13 @@ public:
 							 };
 
 		PerThreadQueue& targetQueue = GetEditablePerThreadQueue( threadIdentifier );
-		targetQueue.AccessMutex.lock();
-		targetQueue.Queue.emplace_back( std::async( std::launch::deferred, taskWrapper, function, parameters ... ) );
+		targetQueue.Queue.Push(new std::future<void>(std::async( std::launch::deferred, taskWrapper, function, parameters ... )));
 #ifdef THREAD_EXECUTION_TIME_TRACKING
 		targetQueue.TaskNames.emplace_back( taskName );
 #else
 		(void)taskName;
 #endif
-		// Wake up a sleeping thread as there is more work to be done
-		{
-			std::lock_guard<std::mutex> lock( targetQueue.EmptyMutex );
-			targetQueue.ExistNewWork = true;
-		}
 		targetQueue.EmptyCV.notify_one();
-		targetQueue.AccessMutex.unlock();
 
 		return std::async( std::launch::deferred, returnWrapper );
 	}
@@ -115,12 +109,10 @@ private:
 	};
 
 	struct PerThreadQueue {
-		std::mutex AccessMutex;
 		std::mutex EmptyMutex;
 		std::condition_variable EmptyCV;
-		bool ExistNewWork = false;
 		bool Joining	  = false;
-		pDeque<std::future<void>> Queue;
+		WorkStealQueue<std::future<void>, 4096> Queue;
 #ifdef THREAD_EXECUTION_TIME_TRACKING
 		pDeque<pString> TaskNames;
 #endif
