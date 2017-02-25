@@ -91,7 +91,7 @@ void ThreadPool::PrintTimes() {
 			for ( auto& time : threadInfo->TaskTimes ) {
 				std::cout << "Thread \"" << threadInfo->Name << "\" ran task \"" << time.TaskName << "\" in "
 					<< std::chrono::duration_cast<std::chrono::nanoseconds>( time.End - time.Start ).count()
-					<< " ticks." << std::endl;
+					<< " ns." << std::endl;
 			}
 			threadInfo->TaskTimesLock.unlock();
 		}
@@ -131,12 +131,12 @@ void ThreadPool::ThreadFunction( ThreadInfo* threadInfo ) {
 	PerThreadQueue& que = GetEditablePerThreadQueue( threadInfo->QueueIndex );
 
 	while ( true ) {
-		if ( que.Queue.IsEmpty() && !que.Joining ) {
+		if ( que.Queue.empty() && !que.Joining ) {
 			// Wait until there is more work to be done
 			std::unique_lock<std::mutex> lock( que.EmptyMutex );
-			que.EmptyCV.wait( lock, [&que, this] { return que.Joining || !que.Queue.IsEmpty(); } );
+			que.EmptyCV.wait( lock, [&que, this] { return que.Joining || !que.Queue.empty(); } );
 			continue;
-		} else if ( !que.Queue.IsEmpty() ) {
+		} else if ( !que.Queue.empty() ) {
 			// Get new task
 			std::future<void>* job = que.Queue.Pop();
 			if (!job)

@@ -16,12 +16,12 @@ public:
 		m_Bottom = 0;
 	}
 
-	size_t GetSize()
+	size_t size() const noexcept
 	{
 		return m_Bottom - m_Top;;
 	}
 
-	size_t IsEmpty()
+	size_t empty() const noexcept
 	{
 		return m_Top == m_Bottom;
 	}
