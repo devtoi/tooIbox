@@ -31,7 +31,7 @@ public:
 		std::promise<ReturnFunction>* promise = tNew( std::promise<ReturnFunction> );
 
 		// TODO: Investigate why VC++ doesn't allow these as move parameters
-		auto taskWrapper = [promise, ready] ( std::function<ReturnFunction( Parameters ... )> function, Parameters ... parameters ) {
+		auto taskWrapper = [promise, ready] ( std::function<ReturnFunction( Parameters ... )> function, Parameters&& ... parameters ) {
 							   promise->set_value( function( parameters ... ) );
 							   ready->store( true );
 						   };
@@ -112,7 +112,7 @@ private:
 		std::mutex EmptyMutex;
 		std::condition_variable EmptyCV;
 		bool Joining	  = false;
-		WorkStealQueue<std::future<void>, 4096> Queue;
+		tooibox::WorkStealQueue<std::future<void>, 4096> Queue;
 #ifdef THREAD_EXECUTION_TIME_TRACKING
 		pDeque<pString> TaskNames;
 #endif

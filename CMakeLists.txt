@@ -35,6 +35,12 @@ file(GLOB_RECURSE UtilitySources
 	"ThreadPool.cpp"
 	"ThreadDefinitions.h"
 	"WorkStealQueue.h"
+	"JobExecutor.h"
+	"JobExecutor.cpp"
+	"Job.h"
+	"Job.cpp"
+	"JobEngine.h"
+	"JobEngine.cpp"
 )
 
 set(UTILITY_MEMORY_LIB)

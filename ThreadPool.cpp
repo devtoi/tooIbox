@@ -139,14 +139,20 @@ void ThreadPool::ThreadFunction( ThreadInfo* threadInfo ) {
 		} else if ( !que.Queue.empty() ) {
 			// Get new task
 			std::future<void>* job = que.Queue.Pop();
-			if (!job)
+			if (job == nullptr)
 				continue;
 
 			TRACK( pString name = que.TaskNames.front(); );
 			TRACK( que.TaskNames.pop_front(); );
 			TRACK( std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now(); );
 			// Run task and wait for finish
+			try{
 			job->get();
+			}
+			catch(...)
+			{
+            std::cout << "Job failed" << std::endl;
+			}
 			TRACK( std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now(); );
 			TRACK( threadInfo->TaskTimesLock.lock() );
 			TRACK( threadInfo->TaskTimes.push_back( TaskExecutionInfo { name, start, end } ) );

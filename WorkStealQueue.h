@@ -5,6 +5,8 @@
 #include <cassert>
 #include <iostream>
 
+namespace tooibox
+{
 template <typename Work, int MAX_NUMBER_OF_JOBS>
 class WorkStealQueue
 {
@@ -39,6 +41,9 @@ public:
 
 	Work* Pop()
 	{
+		if (IsEmpty())
+			return nullptr;
+
 		size_t b = m_Bottom - 1;
 		m_Bottom = b;
 		std::atomic_thread_fence( std::memory_order_seq_cst );
@@ -56,7 +61,7 @@ public:
 			if (!m_Top.compare_exchange_strong(t, t+1))
 			//if ( _InterlockedCompareExchange( &m_Top, t + 1, t ) != t )
 			{
-				std::cout << "Failed race in pop" << std::endl;
+				//std::cout << "Failed race in pop" << std::endl;
 				work = nullptr;
 			}
 			m_Bottom = t2 + 1;
@@ -82,7 +87,7 @@ public:
 			if (!m_Top.compare_exchange_strong(t, t+1))
 			//if ( _InterlockedCompareExchange( &m_Top, t + 1, t ) != t )
 			{
-				std::cout << "Failed race in steal" << std::endl;
+				//std::cout << "Failed race in steal" << std::endl;
 				return nullptr;
 			}
 
@@ -90,7 +95,7 @@ public:
 		}
 		else
 		{
-			std::cout << "t < b failed" << std::endl;
+			//std::cout << "t < b failed" << std::endl;
 			return nullptr;
 		}
 	}
@@ -101,3 +106,4 @@ private:
 	std::atomic_size_t m_Bottom;
 	std::atomic_size_t m_Top;
 };
+}
