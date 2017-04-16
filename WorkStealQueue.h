@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cassert>
 #include <iostream>
+#include <algorithm>
 
 namespace tooibox
 {
@@ -30,24 +31,17 @@ public:
 
 	void Push(Work* work)
 	{
-		size_t b = m_Bottom;
+		size_t b = m_Bottom.load(std::memory_order_acquire);
 		m_Work.at(b & MASK) = work;
-
-		//std::atomic_thread_fence( std::memory_order_seq_cst ); // TODOJM: Use release only?
-		std::atomic_thread_fence( std::memory_order_acq_rel );
-
-		m_Bottom = b+1;
+		m_Bottom.store(b+1, std::memory_order_release);
 	}
 
 	Work* Pop()
 	{
-		if (IsEmpty())
-			return nullptr;
-
-		size_t b = m_Bottom - 1;
-		m_Bottom = b;
-		std::atomic_thread_fence( std::memory_order_seq_cst );
-		size_t t = m_Top;
+		size_t b = m_Bottom.load( std::memory_order_acquire );
+		b = std::max( 0, (int)b - 1 );
+		m_Bottom.store( b, std::memory_order_release );
+		size_t t = m_Top.load(std::memory_order_acquire);
 		if ( t <= b )
 		{
 			Work* work = m_Work.at(b & MASK);
@@ -56,30 +50,30 @@ public:
 				return work;
 			}
 
-			//if ( !std::atomic_compare_exchange_strong(&m_Top, &t, t+1) )
-			size_t t2 = t;
-			if (!m_Top.compare_exchange_strong(t, t+1))
-			//if ( _InterlockedCompareExchange( &m_Top, t + 1, t ) != t )
+			size_t expectedTop = t;
+			size_t desiredTop = t + 1;
+
+			if (!m_Top.compare_exchange_strong(expectedTop, desiredTop, std::memory_order_acq_rel))
 			{
 				//std::cout << "Failed race in pop" << std::endl;
 				work = nullptr;
 			}
-			m_Bottom = t2 + 1;
+			m_Bottom.store( t + 1, std::memory_order_relaxed );
 			return work;
 		}
 		else
 		{
-			m_Bottom = t;
+			m_Bottom.store(t, std::memory_order_release);
 			return nullptr;
 		}
 	}
 
 	Work* Steal()
 	{
-		size_t t = m_Top;
+		size_t t = m_Top.load(std::memory_order_acquire);
 		//std::atomic_thread_fence( std::memory_order_seq_cst ); // TODOJM: Use aquire only?
-		std::atomic_thread_fence( std::memory_order_acquire );
-		size_t b = m_Bottom;
+		//std::atomic_thread_fence( std::memory_order_acquire );
+		size_t b = m_Bottom.load(std::memory_order_acquire);
 		if ( t < b )
 		{
 			Work* work = m_Work.at(t & MASK);
