@@ -3,6 +3,8 @@
 #include <array>
 #include <atomic>
 #include <cstring>
+#include <mutex>
+#include "UtilityLibraryDefine.h"
 
 namespace tooibox
 {
@@ -11,8 +13,8 @@ class Job
 public:
 	using Function = std::function<void(Job&)>;
 
-	Job() = default;
-	Job(Function jobFunction, Job* parent = nullptr);
+	UTILITY_API Job() = default;
+	UTILITY_API Job(Function jobFunction, Job* parent = nullptr);
 	template<typename Data>
 	Job(Function jobFunction, const Data& data, Job* parent = nullptr)
 		: Job{jobFunction, parent}
@@ -26,18 +28,18 @@ public:
 		return *reinterpret_cast<const Data*>(m_padding.data());
 	}
 
-	void Run();
-	bool IsFinished() const;
+	UTILITY_API void Run();
+	UTILITY_API bool IsFinished() const;
 
 private:
-	void Finish();
+	UTILITY_API void Finish();
 
 	Function m_function;
 	Job* m_parent = nullptr;
 	std::atomic_size_t m_unfinishedJobs;
-	static constexpr std::size_t JOB_PAYLOAD_SIZE = sizeof(m_function)
-												  + sizeof(m_parent)
-												  + sizeof(m_unfinishedJobs);
+	static constexpr std::size_t JOB_PAYLOAD_SIZE = sizeof(Function)
+												  + sizeof(Job*)
+												  + sizeof(std::atomic_size_t);
 
 	static constexpr std::size_t JOB_MAX_PADDING_SIZE =
 			128;

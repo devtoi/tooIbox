@@ -9,13 +9,13 @@ namespace tooibox
 class JobEngine
 {
 public:
-	static JobEngine& GetInstance();
+	UTILITY_API static JobEngine& GetInstance();
 
-	JobEngine();
-	~JobEngine();
+	UTILITY_API JobEngine();
+	UTILITY_API ~JobEngine();
 
-	JobExecutor* GetRandomWorker();
-	JobExecutor* GetForegroundExecutor();
+	UTILITY_API JobExecutor* GetRandomWorker();
+	UTILITY_API JobExecutor* GetForegroundExecutor();
 private:
 	// TODOJM: Fetch number of cores avaliable on CPU
 	constexpr static std::size_t NR_OF_EXECUTORS = 8;

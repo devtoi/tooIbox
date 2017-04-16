@@ -23,13 +23,13 @@ public:
 	};
 
 	using JobQueue = WorkStealQueue<Job, 4096>;
-	JobExecutor(tooibox::JobEngine& jobEngine, Mode mode);
+	UTILITY_API JobExecutor(tooibox::JobEngine& jobEngine, Mode mode);
 
-	void Start();
-	void Stop();
-	bool IsRunning() const;
-	void AddJob(Job* job);
-	void WaitForJob(Job* waitJob);
+	UTILITY_API void Start();
+	UTILITY_API void Stop();
+	UTILITY_API bool IsRunning() const;
+	UTILITY_API void AddJob(Job* job);
+	UTILITY_API void WaitForJob(Job* waitJob);
 
 private:
 	Job* GetJob();

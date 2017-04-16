@@ -9,8 +9,11 @@ tooibox::JobExecutor::JobExecutor(tooibox::JobEngine& jobEngine, Mode mode)
 
 void tooibox::JobExecutor::Start()
 {
-	m_thread = std::thread(std::bind(&tooibox::JobExecutor::JobExection, this));
-	m_state.store(tooibox::JobExecutor::State::Running);
+	m_state.store( tooibox::JobExecutor::State::Running );
+	if ( m_mode == tooibox::JobExecutor::Mode::Background )
+	{
+		m_thread = std::thread( std::bind( &tooibox::JobExecutor::JobExection, this ) );
+	}
 }
 
 void tooibox::JobExecutor::Stop()
@@ -80,7 +83,6 @@ tooibox::Job* tooibox::JobExecutor::GetJob()
 
 void tooibox::JobExecutor::JobExection()
 {
-	std::cout << "Started thread." << std::endl; // TODOJM: Remove
 	while(IsRunning())
 	{
 		Job* job = GetJob();
