@@ -2,7 +2,7 @@
 #include "JobEngine.h"
 
 tooibox::JobExecutor::JobExecutor(tooibox::JobEngine& jobEngine, Mode mode)
-	: m_jobEngine{jobEngine}, m_mode{mode}, m_state{tooibox::JobExecutor::State::Idle}
+	: m_jobEngine{ jobEngine }, m_threadID{ std::this_thread::get_id() }, m_mode { mode }, m_state{ tooibox::JobExecutor::State::Idle }
 {
 
 }
@@ -91,4 +91,8 @@ void tooibox::JobExecutor::JobExection()
 		else
 			std::this_thread::yield();
 	}
+}
+std::thread::id tooibox::JobExecutor::GetThreadID() const
+{
+	return m_threadID;
 }

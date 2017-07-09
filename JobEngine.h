@@ -16,6 +16,8 @@ public:
 
 	UTILITY_API JobExecutor* GetRandomWorker();
 	UTILITY_API JobExecutor* GetForegroundExecutor();
+	UTILITY_API JobExecutor* GetThreadWorker();
+	UTILITY_API size_t GetNumberOfBackgroundWorkers() const noexcept;
 private:
 	// TODOJM: Fetch number of cores avaliable on CPU
 	constexpr static std::size_t NR_OF_EXECUTORS = 8;

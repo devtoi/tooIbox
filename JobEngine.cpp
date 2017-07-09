@@ -49,3 +49,21 @@ tooibox::JobExecutor* tooibox::JobEngine::GetForegroundExecutor()
 {
 	return m_jobExecutors.at(0).get();
 }
+
+tooibox::JobExecutor* tooibox::JobEngine::GetThreadWorker()
+{
+	std::thread::id tid = std::this_thread::get_id();
+	for ( auto& je : m_jobExecutors )
+	{
+		if ( je->GetThreadID() == tid )
+		{
+			return je.get();
+		}
+	}
+	return nullptr;
+}
+
+size_t tooibox::JobEngine::GetNumberOfBackgroundWorkers() const noexcept
+{
+	return m_jobExecutors.size() - 1;
+}

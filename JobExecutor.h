@@ -30,12 +30,14 @@ public:
 	UTILITY_API bool IsRunning() const;
 	UTILITY_API void AddJob(Job* job);
 	UTILITY_API void WaitForJob(Job* waitJob);
+	UTILITY_API std::thread::id GetThreadID() const;
 
 private:
 	Job* GetJob();
 	void JobExection();
 
 	tooibox::JobEngine& m_jobEngine;
+	std::thread::id m_threadID;
 	std::atomic<Mode> m_mode;
 	std::atomic<State> m_state;
 	JobQueue m_queue;
